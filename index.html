@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Registration System</title>
+<style>
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 40px;
+        color: #2c3e50;
+    }
+    .container {
+        max-width: 850px;
+        margin: auto;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 5px;
+    }
+    p.subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        margin-top: 0;
+        margin-bottom: 25px;
+    }
+    h2.section {
+        font-size: 18px;
+        color: #2c3e50;
+        border-left: 4px solid #3498db;
+        padding-left: 10px;
+        margin-top: 35px;
+    }
+    form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 15px;
+    }
+    form .full {
+        grid-column: span 2;
+    }
+    label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #34495e;
+        display: block;
+        margin-bottom: 4px;
+    }
+    input {
+        width: 100%;
+        padding: 9px 10px;
+        border: 1px solid #dcdfe3;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    input:focus {
+        outline: none;
+        border-color: #3498db;
+    }
+    .btn {
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .btn-primary {
+        background: #3498db;
+        color: white;
+    }
+    .btn-primary:hover { background: #2d84c1; }
+    .btn-cancel {
+        background: #ecf0f1;
+        color: #2c3e50;
+    }
+    .btn-cancel:hover { background: #dfe4e6; }
+    .btn-row {
+        grid-column: span 2;
+        display: flex;
+        gap: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ecf0f1;
+        font-size: 14px;
+    }
+    th {
+        background: #2c3e50;
+        color: white;
+    }
+    tr:hover { background: #f9f9f9; }
+    .empty {
+        text-align: center;
+        color: #95a5a6;
+        padding: 20px;
+    }
+    .action-btn {
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        font-size: 12px;
+        cursor: pointer;
+        margin-right: 6px;
+        font-weight: 600;
+    }
+    .edit-btn { background: #f39c12; color: white; }
+    .edit-btn:hover { background: #d9880a; }
+    .delete-btn { background: #e74c3c; color: white; }
+    .delete-btn:hover { background: #c0392b; }
+    .note {
+        margin-top: 25px;
+        background: #eef6ff;
+        border-left: 4px solid #3498db;
+        padding: 12px 15px;
+        font-size: 13px;
+        border-radius: 4px;
+    }
+    #formTitle { margin-top: 0; }
+    #statusMsg {
+        margin-top: 10px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Student Registration System</h1>
+    <p class="subtitle">GUI demo (this page) &nbsp;+&nbsp; Postman demo (same API) &nbsp;=&nbsp; one REST backend</p>
+
+    <!-- ===================== ADD / EDIT FORM (GUI) ===================== -->
+    <h2 class="section">1) Add / Edit Student (using this webpage)</h2>
+    <form id="studentForm">
+        <input type="hidden" id="studentId">
+
+        <div>
+            <label>Name</label>
+            <input type="text" id="name" required placeholder="e.g. Rahul Sharma">
+        </div>
+        <div>
+            <label>Email</label>
+            <input type="email" id="email" required placeholder="e.g. rahul@example.com">
+        </div>
+        <div>
+            <label>Course</label>
+            <input type="text" id="course" required placeholder="e.g. Python">
+        </div>
+        <div>
+            <label>Age</label>
+            <input type="number" id="age" placeholder="e.g. 21">
+        </div>
+
+        <div class="btn-row">
+            <button type="submit" class="btn btn-primary" id="submitBtn">Add Student</button>
+            <button type="button" class="btn btn-cancel" id="cancelBtn" style="display:none;">Cancel Edit</button>
+        </div>
+    </form>
+    <div id="statusMsg"></div>
+
+    <!-- ===================== STUDENT LIST ===================== -->
+    <h2 class="section">2) Student List (live data from database)</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Course</th>
+            <th>Age</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="studentTableBody">
+            <!-- rows inserted here by JavaScript -->
+        </tbody>
+    </table>
+    <p class="empty" id="emptyMsg" style="display:none;">No students yet. Add one above, or via Postman!</p>
+
+    <div class="note">
+        <b>For Trainers:</b> Every action on this page (Add / Edit / Delete) calls the exact
+        same REST API endpoints (<code>/api/students</code>) that you will now test manually
+        in <b>Postman</b>. Open your browser's DevTools → Network tab while clicking buttons
+        here to show students the real HTTP requests (GET/POST/PUT/DELETE) being made.
+        See README.md for the full Postman guide.
+    </div>
+</div>
+
+<script>
+const API_URL = "/api/students";
+
+const form = document.getElementById("studentForm");
+const studentIdField = document.getElementById("studentId");
+const nameField = document.getElementById("name");
+const emailField = document.getElementById("email");
+const courseField = document.getElementById("course");
+const ageField = document.getElementById("age");
+const submitBtn = document.getElementById("submitBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const statusMsg = document.getElementById("statusMsg");
+const tableBody = document.getElementById("studentTableBody");
+const emptyMsg = document.getElementById("emptyMsg");
+
+// ---------- Load all students (GET) ----------
+async function loadStudents() {
+    const res = await fetch(API_URL);          // GET /api/students
+    const students = await res.json();
+
+    tableBody.innerHTML = "";
+    emptyMsg.style.display = students.length === 0 ? "block" : "none";
+
+    students.forEach(s => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${s.id}</td>
+            <td>${s.name}</td>
+            <td>${s.email}</td>
+            <td>${s.course}</td>
+            <td>${s.age ?? ""}</td>
+            <td>
+                <button class="action-btn edit-btn" onclick="startEdit(${s.id}, '${s.name}', '${s.email}', '${s.course}', ${s.age ?? "null"})">Edit</button>
+                <button class="action-btn delete-btn" onclick="deleteStudent(${s.id})">Delete</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// ---------- Add or Update (POST / PUT) ----------
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+        name: nameField.value,
+        email: emailField.value,
+        course: courseField.value,
+        age: ageField.value ? parseInt(ageField.value) : null
+    };
+
+    const editingId = studentIdField.value;
+
+    let res;
+    if (editingId) {
+        // UPDATE existing student
+        res = await fetch(`${API_URL}/${editingId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+    } else {
+        // ADD new student
+        res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+    }
+
+    const data = await res.json();
+    statusMsg.textContent = data.message || data.error;
+    statusMsg.style.color = res.ok ? "#27ae60" : "#e74c3c";
+
+    resetForm();
+    loadStudents();
+});
+
+// ---------- Fill form for editing ----------
+function startEdit(id, name, email, course, age) {
+    studentIdField.value = id;
+    nameField.value = name;
+    emailField.value = email;
+    courseField.value = course;
+    ageField.value = age ?? "";
+
+    document.getElementById("submitBtn").textContent = "Update Student";
+    cancelBtn.style.display = "inline-block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ---------- Cancel edit mode ----------
+cancelBtn.addEventListener("click", resetForm);
+
+function resetForm() {
+    form.reset();
+    studentIdField.value = "";
+    submitBtn.textContent = "Add Student";
+    cancelBtn.style.display = "none";
+}
+
+// ---------- Delete (DELETE) ----------
+async function deleteStudent(id) {
+    if (!confirm("Delete this student?")) return;
+
+    const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    const data = await res.json();
+
+    statusMsg.textContent = data.message || data.error;
+    statusMsg.style.color = res.ok ? "#27ae60" : "#e74c3c";
+
+    loadStudents();
+}
+
+// ---------- Initial load ----------
+loadStudents();
+</script>
+</body>
+</html>
